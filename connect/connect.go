@@ -1,4 +1,4 @@
-package rmqtools
+package connect
 
 import (
 	"fmt"
