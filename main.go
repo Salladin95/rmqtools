@@ -9,14 +9,13 @@ import (
 	"time"
 )
 
-func ConnectToRabbit() (*amqp.Connection, error) {
+func ConnectToRabbit(rabbitURL string) (*amqp.Connection, error) {
 	var counts int64
 	var backOff = 1 * time.Second
 	var connection *amqp.Connection
 
-	// don't continue until rabbit is ready
 	for {
-		c, err := amqp.Dial("amqp://guest:guest@rabbitmq")
+		c, err := amqp.Dial(rabbitURL)
 		if err != nil {
 			fmt.Println("RabbitMQ not yet ready...")
 			counts++
