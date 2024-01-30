@@ -1,6 +1,7 @@
 package rmqtools
 
 import (
+	"context"
 	amqp "github.com/rabbitmq/amqp091-go"
 	"log"
 )
@@ -21,7 +22,7 @@ func (e *Emitter) Setup() error {
 	return DeclareExchange(channel, e.exchangeName)
 }
 
-func (e *Emitter) Push(routingKey, data string) error {
+func (e *Emitter) Push(ctx context.Context, routingKey string, data []byte) error {
 	channel, err := e.connection.Channel()
 	if err != nil {
 		return err
@@ -30,14 +31,15 @@ func (e *Emitter) Push(routingKey, data string) error {
 
 	log.Println("Pushing to channel")
 
-	err = channel.Publish(
+	err = channel.PublishWithContext(
+		ctx,
 		e.topicName,
 		routingKey,
 		false,
 		false,
 		amqp.Publishing{
 			ContentType: "text/plain",
-			Body:        []byte(data),
+			Body:        data,
 		},
 	)
 	if err != nil {
