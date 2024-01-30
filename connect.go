@@ -16,7 +16,7 @@ func ConnectToRabbit(rabbitURL string) (*amqp.Connection, error) {
 	for {
 		c, err := amqp.Dial(rabbitURL)
 		if err != nil {
-			fmt.Println("RabbitMQ not yet ready...")
+			fmt.Printf("RabbitMQ not yet ready on url - %s", rabbitURL)
 			counts++
 		} else {
 			log.Println("Connected to RabbitMQ!")

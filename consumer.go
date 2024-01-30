@@ -1,33 +1,14 @@
 package rmqtools
 
 import (
-	"encoding/json"
 	"fmt"
 	amqp "github.com/rabbitmq/amqp091-go"
-	"log"
 )
 
 type Consumer struct {
 	conn         *amqp.Connection
 	exchangeName string
 	queueName    string
-	topicName    string
-}
-
-func NewConsumer(conn *amqp.Connection, exchangeName, queueName, topicName string) (Consumer, error) {
-	consumer := Consumer{
-		conn:         conn,
-		exchangeName: exchangeName,
-		queueName:    queueName,
-		topicName:    topicName,
-	}
-
-	err := consumer.setup()
-	if err != nil {
-		return Consumer{}, err
-	}
-
-	return consumer, nil
 }
 
 func (consumer *Consumer) setup() error {
@@ -39,12 +20,24 @@ func (consumer *Consumer) setup() error {
 	return DeclareExchange(channel, consumer.exchangeName)
 }
 
-type Payload struct {
-	Name string `json:"name"`
-	Data string `json:"data"`
+func NewConsumer(conn *amqp.Connection, exchangeName, queueName string) (Consumer, error) {
+	consumer := Consumer{
+		conn:         conn,
+		exchangeName: exchangeName,
+		queueName:    queueName,
+	}
+
+	err := consumer.setup()
+	if err != nil {
+		return Consumer{}, err
+	}
+
+	return consumer, nil
 }
 
-func (consumer *Consumer) Listen(topics []string) error {
+type IncomingMessagesHandler func(routingKey string, payload []byte)
+
+func (consumer *Consumer) Listen(topics []string, messageHandler IncomingMessagesHandler) error {
 	ch, err := consumer.conn.Channel()
 	if err != nil {
 		return err
@@ -60,7 +53,7 @@ func (consumer *Consumer) Listen(topics []string) error {
 		ch.QueueBind(
 			q.Name,
 			topic,
-			consumer.topicName,
+			consumer.exchangeName,
 			false,
 			nil,
 		)
@@ -78,10 +71,8 @@ func (consumer *Consumer) Listen(topics []string) error {
 	forever := make(chan bool)
 	go func() {
 		for d := range messages {
-			var payload Payload
-			_ = json.Unmarshal(d.Body, &payload)
-
-			go handlePayload(payload)
+			fmt.Printf("calling message handler")
+			go messageHandler(d.RoutingKey, d.Body)
 		}
 	}()
 
@@ -89,12 +80,4 @@ func (consumer *Consumer) Listen(topics []string) error {
 	<-forever
 
 	return nil
-}
-
-func handlePayload(payload Payload) {
-	switch payload.Name {
-	case "auth":
-	default:
-		log.Panic("handlePayload: unknown payload name")
-	}
 }

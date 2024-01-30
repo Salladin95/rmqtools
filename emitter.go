@@ -9,7 +9,6 @@ import (
 type Emitter struct {
 	connection   *amqp.Connection
 	exchangeName string
-	topicName    string
 }
 
 func (e *Emitter) Setup() error {
@@ -17,7 +16,6 @@ func (e *Emitter) Setup() error {
 	if err != nil {
 		return err
 	}
-
 	defer channel.Close()
 	return DeclareExchange(channel, e.exchangeName)
 }
@@ -33,7 +31,7 @@ func (e *Emitter) Push(ctx context.Context, routingKey string, data []byte) erro
 
 	err = channel.PublishWithContext(
 		ctx,
-		e.topicName,
+		e.exchangeName,
 		routingKey,
 		false,
 		false,
@@ -49,11 +47,10 @@ func (e *Emitter) Push(ctx context.Context, routingKey string, data []byte) erro
 	return nil
 }
 
-func NewEventEmitter(conn *amqp.Connection, exchangeName, topicName string) (Emitter, error) {
+func NewEventEmitter(conn *amqp.Connection, exchangeName string) (Emitter, error) {
 	emitter := Emitter{
 		connection:   conn,
 		exchangeName: exchangeName,
-		topicName:    topicName,
 	}
 
 	err := emitter.Setup()
