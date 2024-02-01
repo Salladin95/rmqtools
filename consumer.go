@@ -76,7 +76,7 @@ func (consumer *Consumer) Listen(topics []string, messageHandler IncomingMessage
 		}
 	}()
 
-	fmt.Printf("Waiting for message [Exchange, Queue] [logs_topic, %routingKey]\n", q.Name)
+	fmt.Printf("Waiting for message [Exchange, Queue] [%s, %s routingKey]\n", consumer.exchangeName, q.Name)
 	<-forever
 
 	return nil

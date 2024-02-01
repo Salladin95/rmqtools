@@ -10,13 +10,13 @@ import (
 
 func ConnectToRabbit(rabbitURL string) (*amqp.Connection, error) {
 	var counts int64
-	var backOff = 1 * time.Second
+	var backOff = 2 * time.Second
 	var connection *amqp.Connection
 
 	for {
 		c, err := amqp.Dial(rabbitURL)
 		if err != nil {
-			fmt.Printf("RabbitMQ not yet ready on url - %s\n\n", rabbitURL)
+			fmt.Printf("RabbitMQ not yet ready on url - %s\n", rabbitURL)
 			counts++
 		} else {
 			log.Println("Connected to RabbitMQ!")
@@ -24,7 +24,7 @@ func ConnectToRabbit(rabbitURL string) (*amqp.Connection, error) {
 			break
 		}
 
-		if counts > 5 {
+		if counts > 6 {
 			fmt.Println(err)
 			return nil, err
 		}
