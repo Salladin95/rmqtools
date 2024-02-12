@@ -71,12 +71,11 @@ func (consumer *Consumer) Listen(topics []string, messageHandler IncomingMessage
 	forever := make(chan bool)
 	go func() {
 		for d := range messages {
-			fmt.Printf("calling message handler")
 			go messageHandler(d.RoutingKey, d.Body)
 		}
 	}()
 
-	fmt.Printf("Waiting for message [Exchange, Queue] [%s, %s routingKey]\n", consumer.exchangeName, q.Name)
+	fmt.Printf("Waiting for message [Exchange, Queue] [%s, %s]\n", consumer.exchangeName, q.Name)
 	<-forever
 
 	return nil

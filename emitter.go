@@ -3,7 +3,6 @@ package rmqtools
 import (
 	"context"
 	amqp "github.com/rabbitmq/amqp091-go"
-	"log"
 )
 
 type Emitter struct {
@@ -26,8 +25,6 @@ func (e *Emitter) Push(ctx context.Context, routingKey string, data []byte) erro
 		return err
 	}
 	defer channel.Close()
-
-	log.Println("Pushing to channel")
 
 	err = channel.PublishWithContext(
 		ctx,
