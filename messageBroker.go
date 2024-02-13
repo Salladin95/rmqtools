@@ -36,7 +36,7 @@ func NewMessageBroker(rabbitConn *amqp091.Connection, exchangeName, queueName st
 // It returns an error if any occurs.
 func (mb *messageBroker) PushToQueue(ctx context.Context, routingKey string, data interface{}) error {
 	// Create a new EventEmitter for the specified AMQP exchange.
-	emitter, err := NewEventEmitter(mb.rabbitConn, mb.queueName)
+	emitter, err := NewEventEmitter(mb.rabbitConn, mb.exchangeName)
 	if err != nil {
 		return err
 	}
