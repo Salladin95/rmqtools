@@ -23,7 +23,7 @@ type MessageBroker interface {
 
 	// ListenForUpdates sets up a consumer to listen for updates on the specified topics.
 	// It takes a list of topics to listen to and a message handler function.
-	ListenForUpdates(topics []string, mh func(routingKey string, payload []byte))
+	ListenForUpdates(topics []string, mh func(routingKey string, payload []byte)) error
 }
 
 // NewMessageBroker creates a new instance of MessageBroker.
@@ -58,7 +58,7 @@ func (mb *messageBroker) PushToQueue(ctx context.Context, routingKey string, dat
 
 // ListenForUpdates sets up a consumer to listen for updates on the specified topics.
 // It takes a list of topics to listen to and a message handler function.
-func (mb *messageBroker) ListenForUpdates(topics []string, mh func(routingKey string, payload []byte)) {
+func (mb *messageBroker) ListenForUpdates(topics []string, mh func(routingKey string, payload []byte)) error {
 	// Create a new consumer for the specified AMQP exchange and queue.
 	consumer, err := NewConsumer(
 		mb.rabbitConn,
@@ -71,7 +71,5 @@ func (mb *messageBroker) ListenForUpdates(topics []string, mh func(routingKey st
 
 	// Start listening for messages on the specified topics and invoke the message handler.
 	err = consumer.Listen(topics, mh)
-	if err != nil {
-		fmt.Println(err)
-	}
+	return err
 }
